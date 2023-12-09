@@ -51,14 +51,16 @@ public class Schedule
 
     private void MergeOneTimeHoliday(DateRange dateRangeToAdd)
     {
-        var mergedHolidays = new List<DateRange>();
+        MergeHolidays(this.OneTimeHolidays, dateRangeToAdd);
+    }
 
-        var intersectingHolidays = this.OneTimeHolidays.Where(h => CheckIntersection(h, dateRangeToAdd)).ToList();
+    private void MergeHolidays(List<DateRange> holidays, DateRange dateRangeToAdd)
+    {
+        var intersectingHolidays = holidays.Where(h => CheckIntersection(h, dateRangeToAdd)).ToList();
 
         if (intersectingHolidays.Count == 0)
         {
-            this.OneTimeHolidays.Add(dateRangeToAdd);
-            return;
+            holidays.Add(dateRangeToAdd);
         }
         else
         {
@@ -74,10 +76,13 @@ public class Schedule
                 End = newEndDate
             };
 
-            mergedHolidays.Add(newDateRange);
+            holidays.Add(newDateRange);
         }
 
-        this.OneTimeHolidays = mergedHolidays;
+        foreach (var intersectingHoliday in intersectingHolidays)
+        {
+            holidays.Remove(intersectingHoliday);
+        }
     }
 
     private bool CheckIntersection(DateRange dataRange1, DateRange dataRange2)
