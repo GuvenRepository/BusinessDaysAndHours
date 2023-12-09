@@ -159,4 +159,42 @@ public class Tests
 
         Assert.IsTrue(schedule.GetOneTimeHolidays().Count == 1);
     }
+
+    [Test]
+    public void MergeAnnualHolidays()
+    {
+        var schedule = new Schedule();
+
+        var holidays = new List<DateRange>()
+        {
+            new DateRange()
+            {
+                Start = new DateTime(2023, 10, 5, 13, 0, 0),
+                End = new DateTime(2024, 1, 5, 18, 0, 0)
+            }
+        };
+
+        schedule.SetAnnualHolidays(holidays);
+
+        Assert.IsTrue(schedule.GetAnnualHolidays().Count == 2);
+
+
+        holidays = new List<DateRange>()
+        {
+            new DateRange()
+            {
+                Start = new DateTime(2023, 10, 5, 13, 0, 0),
+                End = new DateTime(2024, 1, 5, 18, 0, 0)
+            },
+            new DateRange()
+            {
+                Start = new DateTime(2024, 1, 5, 18, 0, 0),
+                End = new DateTime(2024, 1, 6, 18, 0, 0)
+            },
+        };
+
+        schedule.SetAnnualHolidays(holidays);
+
+        Assert.IsTrue(schedule.GetAnnualHolidays().Count == 2);
+    }
 }

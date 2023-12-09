@@ -19,19 +19,84 @@ public class Schedule
 
     public void AddAnnualHoliday(DateRange dateRange)
     {
-        this.AnnualHolidays.Add(dateRange);
+        this.MergeAnnualHoliday(dateRange);
     }
 
     public void SetAnnualHolidays(List<DateRange> dateRanges)
     {
-        this.AnnualHolidays.AddRange(dateRanges);
+        this.AnnualHolidays.Clear();
+
+        foreach (var dateRange in dateRanges)
+        {
+            this.MergeAnnualHoliday(dateRange);
+        }
     }
-    
+
+    public List<DateRange> GetAnnualHolidays()
+    {
+        return this.AnnualHolidays;
+    }
+
+    private void MergeAnnualHoliday(DateRange dateRangeToAdd)
+    {
+        if (dateRangeToAdd.End < dateRangeToAdd.Start)
+        {
+            (dateRangeToAdd.Start, dateRangeToAdd.End) = (dateRangeToAdd.End, dateRangeToAdd.Start);
+        }
+
+        if (dateRangeToAdd.Start - dateRangeToAdd.End >= TimeSpan.FromDays(365))
+        {
+            // Make whole year a holiday
+            this.AnnualHolidays.Clear();
+
+            this.AnnualHolidays.Add(new DateRange()
+            {
+                Start = DateTime.MinValue,
+                End = DateTime.MinValue.AddDays(365).Subtract(TimeSpan.FromTicks(1))
+            });
+
+            return;
+        }
+
+        if (dateRangeToAdd.Start.Year != dateRangeToAdd.End.Year)
+        {
+            dateRangeToAdd.Start = this.SetYear(dateRangeToAdd.Start, DateTime.MinValue.Year);
+            dateRangeToAdd.End = this.SetYear(dateRangeToAdd.End, DateTime.MinValue.Year + 1);
+
+            var christmas = new DateTime(dateRangeToAdd.End.Year, 1, 1);
+            
+            this.MergeAnnualHoliday(new DateRange()
+            {
+                Start = dateRangeToAdd.Start,
+                End = christmas.Subtract(TimeSpan.FromTicks(1))
+            });
+
+            this.MergeAnnualHoliday(new DateRange()
+            {
+                Start = this.SetYear(christmas, DateTime.MinValue.Year),
+                End = this.SetYear(dateRangeToAdd.End, DateTime.MinValue.Year)
+            });
+        }
+        else
+        {
+            dateRangeToAdd.Start = this.SetYear(dateRangeToAdd.Start, DateTime.MinValue.Year);
+            dateRangeToAdd.End = this.SetYear(dateRangeToAdd.End, DateTime.MinValue.Year);
+            
+            MergeHolidays(ref this.AnnualHolidays, dateRangeToAdd);
+        }
+
+    }
+
+    private DateTime SetYear(DateTime date, int year)
+    {
+        return new DateTime(year, date.Month, date.Day, date.Hour, date.Minute, date.Second);
+    }
+
     public List<DateRange> GetOneTimeHolidays()
     {
         return this.OneTimeHolidays;
     }
-    
+
     public void AddOneTimeHoliday(DateRange dateRange)
     {
         this.MergeOneTimeHoliday(dateRange);
@@ -45,16 +110,14 @@ public class Schedule
         {
             this.MergeOneTimeHoliday(dateRange);
         }
-
-        this.OneTimeHolidays = this.OneTimeHolidays.OrderBy(h => h.Start).ToList();
     }
 
     private void MergeOneTimeHoliday(DateRange dateRangeToAdd)
     {
-        MergeHolidays(this.OneTimeHolidays, dateRangeToAdd);
+        MergeHolidays(ref this.OneTimeHolidays, dateRangeToAdd);
     }
 
-    private void MergeHolidays(List<DateRange> holidays, DateRange dateRangeToAdd)
+    private void MergeHolidays(ref List<DateRange> holidays, DateRange dateRangeToAdd)
     {
         var intersectingHolidays = holidays.Where(h => CheckIntersection(h, dateRangeToAdd)).ToList();
 
@@ -83,6 +146,8 @@ public class Schedule
         {
             holidays.Remove(intersectingHoliday);
         }
+
+        holidays = holidays.OrderBy(h => h.Start).ToList();
     }
 
     private bool CheckIntersection(DateRange dataRange1, DateRange dataRange2)
