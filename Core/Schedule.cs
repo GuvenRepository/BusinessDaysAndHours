@@ -36,8 +36,6 @@ public class Schedule
     {
         this.OneTimeHolidays.AddRange(dateRanges);
     }
-    
-    
 
     public bool IsBusinessDay(DateTime date)
     {
