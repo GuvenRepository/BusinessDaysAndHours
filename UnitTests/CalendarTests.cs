@@ -5,11 +5,18 @@ namespace UnitTests;
 
 public class Tests
 {
-    private static readonly Schedule schedule = new Schedule();
-
-    [SetUp]
-    public void Setup()
+    [TestCase("2024-01-01T09:00:00", ExpectedResult = false)]
+    [TestCase("2024-01-02T09:00:00", ExpectedResult = true)]
+    [TestCase("2024-01-02T12:00:00", ExpectedResult = true)]
+    [TestCase("2024-01-02T12:30:00", ExpectedResult = false)]
+    [TestCase("2024-01-05T14:00:00", ExpectedResult = false)]
+    [TestCase("2024-01-06T14:00:00", ExpectedResult = false)]
+    public bool IsBusinessDay(string dateStr)
     {
+        var date = DateTime.Parse(dateStr);
+
+        var schedule = new Schedule();
+
         var businessDays = new Dictionary<DayOfWeek, List<TimeRange>>()
         {
             {
@@ -88,7 +95,7 @@ public class Tests
                 }
             }
         };
-        
+
         schedule.SetBusinessDays(businessDays);
 
         var christmas = new DateRange()
@@ -106,18 +113,50 @@ public class Tests
         };
 
         schedule.AddOneTimeHoliday(happyFriday);
-    }
-
-    [TestCase("2024-01-01T09:00:00", ExpectedResult = false)]
-    [TestCase("2024-01-02T09:00:00", ExpectedResult = true)]
-    [TestCase("2024-01-02T12:00:00", ExpectedResult = true)]
-    [TestCase("2024-01-02T12:30:00", ExpectedResult = false)]
-    [TestCase("2024-01-05T14:00:00", ExpectedResult = false)]
-    [TestCase("2024-01-06T14:00:00", ExpectedResult = false)]
-    public bool IsBusinessDay(string dateStr)
-    {
-        var date = DateTime.Parse(dateStr);
 
         return schedule.IsBusinessDay(date);
+    }
+
+    [Test]
+    public void MergeOneTimeHolidays()
+    {
+        var schedule = new Schedule();
+
+        var holidays = new List<DateRange>()
+        {
+            new DateRange()
+            {
+                Start = new DateTime(2024, 1, 5, 13, 0, 0),
+                End = new DateTime(2024, 1, 5, 18, 0, 0)
+            },
+            new DateRange()
+            {
+                Start = new DateTime(2024, 1, 6, 13, 0, 0),
+                End = new DateTime(2024, 1, 6, 18, 0, 0)
+            }
+        };
+
+        schedule.SetOneTimeHolidays(holidays);
+
+        Assert.IsTrue(schedule.GetOneTimeHolidays().Count == 2);
+
+
+        holidays = new List<DateRange>()
+        {
+            new DateRange()
+            {
+                Start = new DateTime(2024, 1, 5, 13, 0, 0),
+                End = new DateTime(2024, 1, 5, 18, 0, 0)
+            },
+            new DateRange()
+            {
+                Start = new DateTime(2024, 1, 5, 18, 0, 0),
+                End = new DateTime(2024, 1, 6, 18, 0, 0)
+            }
+        };
+
+        schedule.SetOneTimeHolidays(holidays);
+
+        Assert.IsTrue(schedule.GetOneTimeHolidays().Count == 1);
     }
 }
