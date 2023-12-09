@@ -2,9 +2,9 @@ namespace Core;
 
 public class Schedule
 {
-    public Dictionary<DayOfWeek, List<TimeRange>> BusinessDays { get; set; } = new Dictionary<DayOfWeek, List<TimeRange>>();
-    public List<DateRange> AnnualHolidays { get; set; } = new List<DateRange>();
-    public List<DateRange> OneTimeHolidays { get; set; } = new List<DateRange>();
+    private Dictionary<DayOfWeek, List<TimeRange>> BusinessDays = new Dictionary<DayOfWeek, List<TimeRange>>();
+    private List<DateRange> AnnualHolidays = new List<DateRange>();
+    private List<DateRange> OneTimeHolidays = new List<DateRange>();
 
 
     public bool IsBusinessDay(DateTime date)
@@ -30,5 +30,35 @@ public class Schedule
         }
 
         return true;
+    }
+    
+    public void AddBusinessDay(DayOfWeek dayOfWeek, List<TimeRange> timeRanges)
+    {
+        this.BusinessDays.Add(dayOfWeek, timeRanges);
+    }
+    
+    public void SetBusinessDays(Dictionary<DayOfWeek, List<TimeRange>> businessDays)
+    {
+        this.BusinessDays = businessDays;
+    }
+
+    public void AddAnnualHoliday(DateRange dateRange)
+    {
+        this.AnnualHolidays.Add(dateRange);
+    }
+    
+    public void SetAnnualHolidays(List<DateRange> dateRanges)
+    {
+        this.AnnualHolidays.AddRange(dateRanges);
+    }
+
+    public void AddOneTimeHoliday(DateRange dateRange)
+    {
+        this.OneTimeHolidays.Add(dateRange);
+    }
+    
+    public void SetOneTimeHolidays(List<DateRange> dateRanges)
+    {
+        this.OneTimeHolidays.AddRange(dateRanges);
     }
 }

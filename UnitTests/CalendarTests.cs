@@ -10,7 +10,7 @@ public class Tests
     [SetUp]
     public void Setup()
     {
-        schedule.BusinessDays = new Dictionary<DayOfWeek, List<TimeRange>>()
+        var businessDays = new Dictionary<DayOfWeek, List<TimeRange>>()
         {
             {
                 DayOfWeek.Monday, new List<TimeRange>()
@@ -88,6 +88,8 @@ public class Tests
                 }
             }
         };
+        
+        schedule.SetBusinessDays(businessDays);
 
         var christmas = new DateRange()
         {
@@ -95,7 +97,7 @@ public class Tests
             End = new DateTime(2024, 1, 2, 0, 0, 0)
         };
 
-        schedule.AnnualHolidays.Add(christmas);
+        schedule.AddAnnualHoliday(christmas);
 
         var happyFriday = new DateRange()
         {
@@ -103,7 +105,7 @@ public class Tests
             End = new DateTime(2024, 1, 5, 18, 0, 0)
         };
 
-        schedule.OneTimeHolidays.Add(happyFriday);
+        schedule.AddOneTimeHoliday(happyFriday);
     }
 
     [TestCase("2024-01-01T09:00:00", ExpectedResult = false)]
