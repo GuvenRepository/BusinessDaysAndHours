@@ -28,4 +28,29 @@ public class Schedule
     public List<DateRange> AnnualHolidays { get; set; } = new List<DateRange>();
 
     public List<DateRange> OneTimeHolidays { get; set; } = new List<DateRange>();
+    
+    public bool IsBusinessDay(DateTime date)
+    {
+        if (!this.BusinessDays.Contains(date.DayOfWeek))
+        {
+            return false;
+        }
+
+        if (this.AnnualHolidays.Any(h => h.Start <= date && date <= h.End))
+        {
+            return false;
+        }
+
+        if (this.OneTimeHolidays.Any(h => h.Start <= date && date <= h.End))
+        {
+            return false;
+        }
+
+        if(!this.BusinessHours.Any(h => h.Start <= date.TimeOfDay && date.TimeOfDay <= h.End))
+        {
+            return false;
+        }
+
+        return true;
+    }
 }

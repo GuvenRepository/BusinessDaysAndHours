@@ -5,6 +5,8 @@ namespace UnitTests;
 
 public class Tests
 {
+    private static readonly Schedule schedule = new Schedule();
+    
     [SetUp]
     public void Setup()
     {
@@ -14,7 +16,7 @@ public class Tests
             End = new DateTime(2024, 1, 2, 0, 0, 0)
         };
 
-        Calendar.BusinessSchedule.AnnualHolidays.Add(christmas);
+        schedule.AnnualHolidays.Add(christmas);
         
         var happyFriday = new DateRange()
         {
@@ -22,7 +24,7 @@ public class Tests
             End = new DateTime(2024, 1, 5, 18, 0, 0)
         };
         
-        Calendar.BusinessSchedule.OneTimeHolidays.Add(happyFriday);
+        schedule.OneTimeHolidays.Add(happyFriday);
     }
 
     [TestCase("2024-01-01T09:00:00", ExpectedResult = false)]
@@ -32,6 +34,6 @@ public class Tests
     {
         var date = DateTime.Parse(dateStr);
 
-        return date.IsBusinessDay();
+        return schedule.IsBusinessDay(date);
     }
 }
